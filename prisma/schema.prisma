@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventStatus {
+  DRAFT
+  DRAWN
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Event {
+  id          String       @id @default(cuid())
+  name        String
+  status      EventStatus  @default(DRAFT)
+  createdAt   DateTime     @default(now())
+
+  employees   Employee[]
+  assignments Assignment[]
+}
+
+model Employee {
+  id       String @id @default(cuid())
+  name     String
+  email    String
+  eventId  String
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // TODO 1: dodaj relacje odwrotne do Assignment — pracownik jako "giver" i jako "receiver"
+  // Hint: potrzebujesz DWÓCH pól relacyjnych po stronie Employee, bo jeden Employee
+  // może być zarówno dawcą w jednym Assignment, jak i odbiorcą w innym.
+  // Nazwij je np. givenAssignments / receivedAssignments i użyj @relation("Giver") / @relation("Receiver")
+  // po obu stronach (patrz plik .reference.prisma)
+
+  @@unique([eventId, email]) // jeden email raz na dane wydarzenie
+}
+
+model Assignment {
+  id          String      @id @default(cuid())
+  eventId     String
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  giverId     String
+  receiverId  String
+  emailStatus EmailStatus @default(PENDING)
+  sentAt      DateTime?
+
+  // TODO 2: dodaj pola relacyjne giver/receiver wskazujące na Employee
+  // Hint: to tu podpinasz się pod nazwane relacje z TODO 1 — @relation("Giver", fields: [giverId], references: [id])
+  // i analogicznie dla receiver z nazwą "Receiver"
+
+  @@unique([eventId, giverId]) // jedna osoba losuje tylko raz w danym evencie
+}
