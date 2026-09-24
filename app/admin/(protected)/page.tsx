@@ -41,13 +41,21 @@ export default async function AdminDashboardPage() {
           </form>
         </CardContent>
       </Card>
-
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Poprzednie wydarzenia</h2>
-       {events.map(event => (
-         <Link key={event.id} href={`/admin/events/${event.id}/employees`}><Badge>{event.name}</Badge> </Link>
-          ))} 
-      </div>
+<div className="space-y-2">
+  <h2 className="text-lg font-semibold">Poprzednie wydarzenia</h2>
+  {events.map(event => (
+    <Link
+      key={event.id}
+      href={`/admin/events/${event.id}/employees`}
+      className="flex items-center justify-between p-3 border rounded-md hover:bg-muted transition-colors"
+    >
+      <span>{event.name}</span>
+      <Badge variant={event.status === 'DRAWN' ? 'default' : 'secondary'}>
+        {event.status}
+      </Badge>
+    </Link>
+  ))}
+</div>
     </div>
   )
 }
